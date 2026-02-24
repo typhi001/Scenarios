@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scenario Switcher (Class Discussion Game)</title>
+  <style>
+    :root{
+      --bg1:#fff7fb;
+      --bg2:#f2fbff;
+      --card:#ffffffcc;
+      --ink:#2a2a2a;
+      --muted:#5a5a5a;
+
+      --a:#ffd6e7;   /* pink */
+      --b:#d7f5ff;   /* sky */
+      --c:#dcfbe6;   /* mint */
+      --d:#fff3c6;   /* butter */
+      --e:#e8ddff;   /* lavender */
+
+      --shadow: 0 14px 30px rgba(20,20,40,.10);
+      --radius: 22px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 15% 10%, var(--a) 0%, transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, var(--b) 0%, transparent 60%),
+        radial-gradient(900px 650px at 50% 90%, var(--c) 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .wrap{
+      width:min(980px, 100%);
+      display:grid;
+      gap:16px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding:6px 6px 0;
+    }
+
+    .title{
+      line-height:1.1;
+    }
+    .title h1{
+      margin:0;
+      font-size: clamp(22px, 2.8vw, 32px);
+      letter-spacing:-.02em;
+    }
+    .title p{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size: 14px;
+      max-width: 62ch;
+    }
+
+    .badge{
+      user-select:none;
+      padding:10px 12px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--d), var(--e));
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      color:#333;
+      white-space:nowrap;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(0,0,0,.05);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .scenarioHeader{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--a), var(--b));
+      border: 1px solid rgba(0,0,0,.05);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .pill small{
+      font-weight: 600;
+      opacity:.85;
+    }
+
+    .scenarioTitle{
+      margin:8px 0 6px;
+      font-size: clamp(18px, 2vw, 22px);
+      letter-spacing:-.01em;
+    }
+    .scenarioText{
+      margin:0;
+      color: #2f2f2f;
+      font-size: 15px;
+      line-height:1.55;
+      white-space: pre-wrap;
+    }
+
+    .bigQuestion{
+      margin-top:14px;
+      padding:14px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.35));
+      border: 1px dashed rgba(0,0,0,.10);
+    }
+    .bigQuestion h3{
+      margin:0 0 6px;
+      font-size: 14px;
+      letter-spacing:.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .bigQuestion p{
+      margin:0;
+      font-size: 15px;
+      line-height:1.5;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    button{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-weight: 750;
+      font-size: 14px;
+      color:#222;
+      box-shadow: 0 10px 20px rgba(20,20,40,.12);
+      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+    }
+    button:active{
+      transform: translateY(1px) scale(.99);
+      box-shadow: 0 6px 14px rgba(20,20,40,.10);
+    }
+    button:focus{
+      outline: 3px solid rgba(120,160,255,.35);
+      outline-offset: 2px;
+    }
+
+    .btnNew{
+      background: linear-gradient(90deg, var(--c), var(--b));
+    }
+    .btnQs{
+      background: linear-gradient(90deg, var(--d), var(--a));
+    }
+    .btnBack{
+      background: linear-gradient(90deg, var(--e), var(--b));
+    }
+
+    .side h2{
+      margin:0 0 10px;
+      font-size: 16px;
+      letter-spacing:.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .qsBox{
+      border-radius: var(--radius);
+      padding: 14px;
+      border: 1px solid rgba(0,0,0,.06);
+      background: linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,.30));
+      min-height: 220px;
+    }
+
+    ol{
+      margin: 0;
+      padding-left: 20px;
+      line-height:1.5;
+    }
+    li{ margin: 10px 0; }
+
+    .hint{
+      margin-top:10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .hidden{ display:none !important; }
+
+    .footer{
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 0 6px;
+    }
+    .footer span{
+      background: rgba(255,255,255,.55);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.05);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Scenario Switcher 🎲</h1>
+        <p>Click <strong>Give me a new scenario</strong>, discuss the big question, then reveal the discussion questions.</p>
+      </div>
+      <div class="badge" id="progressBadge">0 / 5 scenarios used</div>
+    </header>
+
+    <div class="grid">
+      <!-- Main scenario panel -->
+      <section class="card main">
+        <div class="scenarioHeader">
+          <div class="pill" id="scenarioPill">Ready? <small>Pick a scenario</small></div>
+        </div>
+
+        <h2 class="scenarioTitle" id="scenarioTitle">Press “Give me a new scenario”</h2>
+        <p class="scenarioText" id="scenarioText">You’ll get one of five scenarios. Try not to rush — let everyone speak.</p>
+
+        <div class="bigQuestion" id="bigQuestionBox">
+          <h3>Big question</h3>
+          <p id="bigQuestionText">—</p>
+        </div>
+
+        <div class="controls">
+          <button class="btnNew" id="btnNew">Give me a new scenario</button>
+          <button class="btnQs" id="btnQs" disabled>Discussion questions</button>
+          <button class="btnBack hidden" id="btnBack">Back to scenario</button>
+        </div>
+
+        <p class="hint" id="hintText">Tip: Set a timer (e.g., 3–5 minutes) for the big question before revealing the discussion questions.</p>
+      </section>
+
+      <!-- Questions panel -->
+      <aside class="card side">
+        <h2>Discussion questions</h2>
+        <div class="qsBox">
+          <div id="qsEmpty">
+            <p class="scenarioText" style="margin:0;">
+              Not revealed yet ✨<br/>
+              When you’re ready, click <strong>Discussion questions</strong>.
+            </p>
+          </div>
+
+          <div id="qsListWrap" class="hidden">
+            <ol id="qsList"></ol>
+
+            <div class="controls" style="margin-top:14px;">
+              <button class="btnNew" id="btnNewFromQs">Give me a new scenario!</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">
+      <span>Pastel mode: ON • Random, no immediate repeats • Cycles through all 5</span>
+    </div>
+  </div>
+
+  <script>
+    const SCENARIOS = [
+      {
+        title: "THE GROUP CHAT",
+        scenario:
+`Emma is part of a tight-knit friend group. In their private group chat, people often make jokes about classmates — sometimes about weight, clothes, or accents. Everyone laughs. Emma feels uncomfortable, especially when the jokes target someone she knows is already insecure. One day, a joke goes too far. Emma types: “This isn’t funny.” The chat goes silent. Someone replies: “Relax. Don’t be so sensitive.”`,
+        bigQuestion:
+"What would you do in Emma’s position? What might be the short-term / long-term effects of that decision?",
+        questions: [
+          "What are the unwritten rules of this group? What kind of behaviour is rewarded/punished?",
+          "What happens if Emma stays silent long-term? When does she become complicit?",
+          "What happens if she constantly challenges the group?",
+          "Why do you think so many people would refuse to stand up against the group?"
+        ]
+      },
+      {
+        title: "PARTY CULTURE",
+        scenario:
+`Daniel’s class celebrates every exam period with heavy drinking. It’s seen as a ritual. Daniel doesn’t want to drink — not for religious reasons, not because of trauma — he just doesn’t like losing control. His friends say: “Just one shot.” “Don’t be weird.” “You think you’re better than us?”`,
+        bigQuestion:
+"What would you do in Daniel’s position? What might be the short-term / long-term effects of that decision?",
+        questions: [
+          "Why do communities create shared rituals? What function does it have?",
+          "Does a group have the right to expect everyone to conform to rituals?",
+          "Why can refusing feel like rejecting the group itself?",
+          "Would the situation be different if Daniel was a girl?"
+        ]
+      },
+      {
+        title: "ACHIEVEMENT CULTURE",
+        scenario:
+`At Nora’s school, success means top grades, competitions, internships, constant productivity. Everyone compares results. Nora is exhausted. She wants balance — art, sleep, slower pace. Her friends say: “If you slow down now, you’ll fall behind forever.”`,
+        bigQuestion:
+"What would you do in Nora’s position? What might be the short-term / long-term effects of that decision?",
+        questions: [
+          "What is the definition of success in this culture? Who defines it? Can it be changed?",
+          "Who benefits most from this “achievement culture”?",
+          "How can achievement culture be both motivating and harmful?",
+          "If Nora ends up suffering from burnout, is that a personal issue or a community issue?"
+        ]
+      },
+      {
+        title: "FAMILY EXPECTATION",
+        scenario:
+`Lina comes from a family where everyone becomes either a lawyer or a doctor. It’s not forced — just “expected.” Family pride is built around this tradition. Lina wants to study visual arts. Her parents say: “You’re too smart to waste your talent.” Her grandparents say: “We sacrificed everything for you.”`,
+        bigQuestion:
+"What would you do in Lina’s position? What might be the short-term / long-term effects of that decision?",
+        questions: [
+          "Is Lina truly free to choose what she wants to study?",
+          "Is this family expectation a form of pressure or care?",
+          "What does it mean that you “owe something” to your community? Does it come with responsibility?",
+          "Why might law or medicine symbolize success in this family?"
+        ]
+      },
+      {
+        title: "GETTING LABELLED",
+        scenario:
+`Alex recently came out as religious in a strongly secular (non-religious) community in her school. Suddenly, everything Alex says is filtered through that label. “You religious people think…” or “That’s because you’re one of them.”`,
+        bigQuestion:
+"What would you do in Alex’s position? What might be the short-term / long-term effects of that decision?",
+        questions: [
+          "What is the function of labelling in communities?",
+          "Can someone fully belong to a community if they no longer share core values?",
+          "Are people who label Alex personally threatened or as a community?",
+          "Would it have been preferable if Alex had kept her religious feelings to herself?"
+        ]
+      }
+    ];
+
+    // --- State ---
+    let currentIndex = -1;
+    let bag = [];        // shuffled indices not yet used in this cycle
+    let usedCount = 0;   // within the current cycle of 5
+
+    // --- Elements ---
+    const scenarioPill = document.getElementById("scenarioPill");
+    const scenarioTitle = document.getElementById("scenarioTitle");
+    const scenarioText = document.getElementById("scenarioText");
+    const bigQuestionText = document.getElementById("bigQuestionText");
+
+    const btnNew = document.getElementById("btnNew");
+    const btnQs = document.getElementById("btnQs");
+    const btnBack = document.getElementById("btnBack");
+    const btnNewFromQs = document.getElementById("btnNewFromQs");
+
+    const qsEmpty = document.getElementById("qsEmpty");
+    const qsListWrap = document.getElementById("qsListWrap");
+    const qsList = document.getElementById("qsList");
+    const progressBadge = document.getElementById("progressBadge");
+
+    function shuffle(arr){
+      for (let i = arr.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function refillBagAvoidImmediateRepeat(){
+      const indices = [...Array(SCENARIOS.length)].map((_, i) => i);
+      shuffle(indices);
+
+      // Avoid immediate repeat if possible
+      if (indices.length > 1 && indices[0] === currentIndex){
+        // swap first with first different
+        const k = indices.findIndex(x => x !== currentIndex);
+        if (k > 0) [indices[0], indices[k]] = [indices[k], indices[0]];
+      }
+
+      bag = indices;
+      usedCount = 0;
+    }
+
+    function updateProgress(){
+      progressBadge.textContent = `${usedCount} / ${SCENARIOS.length} scenarios used`;
+    }
+
+    function showScenario(i){
+      const s = SCENARIOS[i];
+      currentIndex = i;
+
+      scenarioPill.textContent = `Scenario ${i + 1} • ${s.title}`;
+      scenarioTitle.textContent = s.title;
+      scenarioText.textContent = s.scenario;
+      bigQuestionText.textContent = s.bigQuestion;
+
+      // Hide questions view
+      qsEmpty.classList.remove("hidden");
+      qsListWrap.classList.add("hidden");
+      btnBack.classList.add("hidden");
+      btnQs.disabled = false;
+    }
+
+    function nextScenario(){
+      if (bag.length === 0){
+        refillBagAvoidImmediateRepeat();
+      }
+
+      const i = bag.shift();
+      usedCount++;
+      updateProgress();
+      showScenario(i);
+    }
+
+    function showQuestions(){
+      if (currentIndex < 0) return;
+
+      const s = SCENARIOS[currentIndex];
+      qsList.innerHTML = "";
+      s.questions.forEach(q => {
+        const li = document.createElement("li");
+        li.textContent = q;
+        qsList.appendChild(li);
+      });
+
+      qsEmpty.classList.add("hidden");
+      qsListWrap.classList.remove("hidden");
+      btnBack.classList.remove("hidden");
+    }
+
+    function backToScenario(){
+      qsEmpty.classList.remove("hidden");
+      qsListWrap.classList.add("hidden");
+      btnBack.classList.add("hidden");
+    }
+
+    // --- Wiring ---
+    btnNew.addEventListener("click", nextScenario);
+    btnNewFromQs.addEventListener("click", nextScenario);
+    btnQs.addEventListener("click", showQuestions);
+    btnBack.addEventListener("click", backToScenario);
+
+    // Initialize
+    refillBagAvoidImmediateRepeat();
+    updateProgress();
+    btnQs.disabled = true;
+  </script>
+</body>
+</html>
